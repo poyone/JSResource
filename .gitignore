@@ -1,0 +1,49 @@
+# 依赖目录
+/node_modules
+
+# 构建输出目录
+/build
+/dist
+
+# 缓存和日志目录
+/.cache
+/.logs
+
+# 环境变量文件
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器/IDE 相关
+/.idea
+/.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 测试相关
+/coverage
+/.nyc_output
+
+# 其他
+*.log
+*.tmp
+*.bak
