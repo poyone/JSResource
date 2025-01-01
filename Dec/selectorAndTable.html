@@ -1,0 +1,570 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style public>
+        :root {
+            font-size: 18px;
+            font-family: "Noto Serif CJK SC", "Times New Roman", serif;
+            --selector-z-index: 10;
+            --selector-mask-z-index: 11;
+            --table-header-z-index: 1;
+            --table-fixed-col-z-index: 2;
+            --table-fixed-header-col: 3;
+            --border-color: #ddd;
+            --color-grey-lightest: #fffffe;
+            --color-grey-light: #f5f5f5;
+            --color-grey-normal: #f2f2f2;
+            --color-grey-deeper-font: #696f78;
+            --color-grey-deepest: #424242;
+            --color-green-light: #e0ffff;
+            --color-green-normal: #8bc34a;
+            --color-green-deeper: #558b2f;
+            --color-green-deepest: #57d5c8;
+            --table-fixed-header-col-color: #57d5c9;
+            --table-fixed-odd-color: #daf8f7;
+            --table-fixed-even-color: #fffffe;
+            --odd-color: #daf8f6;
+            --even-color: #fffffd;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0 auto;
+            width: 90%;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+        .click-animation {
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .click-animation:active {
+            transform: scale(0.95);
+        }
+    </style>
+    <style selector>
+        .SELECTOR {
+            position: relative;
+            box-shadow: 4px 0px 2px var(--color-grey-light);
+        }
+        .selector {
+            cursor: pointer;
+        }
+        .selector.displayer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            padding: 6px;
+            padding-left: 1.75rem;
+            background-color: var(--color-green-deepest);
+        }
+        .selector.displayer .text {
+            flex-grow: 1;
+            color: var(--color-grey-lightest);
+        }
+        .selector.content {
+            display: grid;
+            overflow: hidden;
+            grid-template-rows: 0fr;
+            transition: 0.3s ease-in-out;
+            position: absolute;
+            width: 100%;
+            visibility: hidden;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            background-color: var(--color-grey-lightest);
+        }
+        .selector.content>.content-container {
+            min-height: 0px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .selector-option {
+            height: 1.75rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .selector-option span {
+            position: absolute;
+            left: 1.75rem;
+        }
+        .selector-option:hover {
+            background-color: var(--odd-color);
+        }
+        .selected-option svg {
+            position: relative;
+            left: 0.25rem;
+        }
+        .expand-selector-content {
+            grid-template-rows: 1fr !important;
+            visibility: visible !important;
+        }
+    </style>
+    <style table>
+        .table-container {
+            height: 25vh;
+            width: 100%;
+            margin-top: 2em;
+            border: 1px solid var(--color-green-deepest);
+            overflow: auto;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            min-width: max-content;
+            border-spacing: 0;
+        }
+        thead {
+            z-index: var(--table-header-z-index);
+            height: 2.5em;
+            color: black;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+        thead td:not(.fixed-col) {
+            position: sticky;
+            top: 0;
+            background-color: var(--color-green-deepest);
+        }
+        thead td {
+            min-width: 100px;
+        }
+        tbody tr {
+            height: 1.5rem;
+        }
+        tbody td {
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            padding: 8px 16px;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: var(--odd-color);
+        }
+        tbody tr:nth-child(.even) {
+            background-color: var(--even-color);
+        }
+        .fixed-col {
+            position: sticky;
+            width: 6rem;
+            z-index: var(--table-fixed-col-z-index);
+        }
+        .fixed-col-0 {
+            left: 0;
+        }
+        .fixed-col-1 {
+            left: 6rem;
+        }
+        .fixed-col-2 {
+            left: 12rem;
+        }
+        .fixed-col-3 {
+            left: 18rem;
+            border-right: 1px solid var(--border-color);
+        }
+        thead .fixed-col-0,
+        thead .fixed-col-1,
+        thead .fixed-col-2,
+        thead .fixed-col-3 {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background-color: var(--table-fixed-header-col-color);
+        }
+        tbody tr:nth-child(odd) .fixed-col {
+            background-color: var(--table-fixed-odd-color);
+        }
+        tbody tr:nth-child(even) .fixed-col {
+            background-color: var(--table-fixed-even-color);
+        }
+    </style>
+    <style layout>
+        .function-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .right-container {
+            display: flex;
+            align-items: center;
+        }
+        .datetime :first-child {
+            margin-right: 8px;
+        }
+        input[type="month"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            outline: none;
+        }
+        .type-select {
+            display: flex;
+            margin-right: 4rem;
+        }
+        .type-select>.type-button {
+            width: 4rem;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            padding: 6px;
+        }
+        .type-select> :not(.type-button:last-of-type) {
+            border-right: none;
+        }
+        .selected-type {
+            color: var(--color-grey-lightest);
+            background-color: var(--color-green-deepest);
+            border: none !important;
+        }
+        .range-select {
+            display: flex;
+            justify-content: right;
+            height: 38px;
+            z-index: var(--selector-z-index);
+        }
+        .range-select>div {
+            width: 10rem;
+        }
+        .selector-mask {
+            background-color: transparent;
+            height: 100%;
+            z-index: var(--selector-mask-z-index);
+            position: absolute;
+            width: calc(100% + 2.5rem);
+            top: 0;
+            left: -2.5rem;
+            cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M27.875%2015.938c0%206.592-5.345%2011.937-11.937%2011.937C9.345%2027.875%204%2022.53%204%2015.938C4%209.345%209.345%204%2015.938%204c6.592%200%2011.937%205.345%2011.937%2011.938%22%2F%3E%3Cpath%20fill%3D%22%23F8312F%22%20d%3D%22M15.95%202C8.26%202%202%208.26%202%2015.95S8.26%2029.9%2015.95%2029.9S29.9%2023.65%2029.9%2015.95S23.65%202%2015.95%202m10.94%2013.95c0%202.367-.762%204.56-2.05%206.35a.245.245%200%200%201-.373.028L9.573%207.443A.245.245%200%200%201%209.6%207.07a10.84%2010.84%200%200%201%206.35-2.05c6.03-.01%2010.94%204.9%2010.94%2010.93m-21.88%200c0-2.377.772-4.57%202.06-6.36a.245.245%200%200%201%20.373-.027l14.894%2014.894a.245.245%200%200%201-.028.373a10.9%2010.9%200%200%201-6.359%202.06c-6.03%200-10.94-4.91-10.94-10.94%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+                auto;
+        }
+        .area-select {
+            margin-right: 3rem;
+        }
+        .area-select .selector.displayer::before {
+            content: "领域";
+            position: absolute;
+            left: -2.5rem;
+        }
+        .team-select .selector.displayer::before {
+            content: "团队";
+            position: absolute;
+            left: -2.5rem;
+        }
+        .query-button {
+            height: 38px;
+            margin-left: 2rem;
+            color: var(--color-grey-lightest);
+            background-color: var(--color-green-deepest);
+            width: 4rem;
+            text-align: center;
+            cursor: pointer;
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>数据开发五部人员全景图</h1>
+    <div class="function-bar">
+        <div class="datetime">
+            <label for="startdate">开始时间<input type="month" name="startdate" id="startdate" /></label>
+            <label for="enddate">结束时间<input type="month" name="enddate" id="enddate" /></label>
+        </div>
+        <div class="right-container">
+            <div class="type-select">
+                <div class="type-button click-animation">领域</div>
+                <div class="type-button click-animation">团队</div>
+                <div class="type-button click-animation selected-type">个人</div>
+            </div>
+            <div class="range-select">
+                <div class="area-select"></div>
+                <div class="team-select"></div>
+            </div>
+            <div class="query-button click-animation">查询</div>
+        </div>
+    </div>
+    <div class="table-container"></div>
+    <script constants>
+        const fixedCols = 4;
+        const colNames = [
+            "领域", "团队", "员工", "角色", "需求方案", "详设", "开发US", "TASK", "故障", "低级编码", "工程故障", "补丁问题", "定位时长", "业务技能", "编码认证", "考试情况", "关键角色认证", "荣誉",
+        ];
+        const tableContainer = document.querySelector(".table-container");
+        const areaSelectorContainer = document.querySelector(".range-select .area-select");
+        const teamSelectorContainer = document.querySelector(".range-select .team-select");
+        const areaAndTeam = {
+            areaA: ["team A1", "team A2", "team A3"],
+            areaB: ["team B1", "team B2", "team B3"],
+        };
+        const typeSelectContainer = document.querySelector(".type-select");
+        const keyArray = [
+            "area", "team", "member", "role", "demandSolution", "specification", "devUS", "task", "fault", "lowLevelCoding", "engineeringFault", "patchIssue", "locatingTime", "skill", "certificate", "exam", "keyRoleCertification", "honor",
+        ];
+        const tableData = {
+            table: [
+                { area: "区域A", team: "团队1", member: "成员1", role: "工程师", demandSolution: "需求解决方案1", specification: "规格书1", devUS: 10, task: "任务1", fault: "故障1", lowLevelCoding: "底层编码1", engineeringFault: "工程故障1", patchIssue: "补丁问题1", locatingTime: "1小时", skill: "技能1", certificate: "证书1", exam: "考试1", keyRoleCertification: "关键角色认证1", honor: "荣誉1" },
+                { area: "区域B", team: "团队2", member: "成员2", role: "设计师", demandSolution: "需求解决方案2", specification: "规格书2", devUS: 20, task: "任务2", fault: "故障2", lowLevelCoding: "底层编码2", engineeringFault: "工程故障2", patchIssue: "补丁问题2", locatingTime: "2小时", skill: "技能2", certificate: "证书2", exam: "考试2", keyRoleCertification: "关键角色认证2", honor: "荣誉2" },
+                { area: "区域C", team: "团队3", member: "成员3", role: "测试员", demandSolution: "需求解决方案3", specification: "规格书3", devUS: 30, task: "任务3", fault: "故障3", lowLevelCoding: "底层编码3", engineeringFault: "工程故障3", patchIssue: "补丁问题3", locatingTime: "3小时", skill: "技能3", certificate: "证书3", exam: "考试3", keyRoleCertification: "关键角色认证3", honor: "荣誉3" },
+                { area: "区域D", team: "团队4", member: "成员4", role: "项目经理", demandSolution: "需求解决方案4", specification: "规格书4", devUS: 40, task: "任务4", fault: "故障4", lowLevelCoding: "底层编码4", engineeringFault: "工程故障4", patchIssue: "补丁问题4", locatingTime: "4小时", skill: "技能4", certificate: "证书4", exam: "考试4", keyRoleCertification: "关键角色认证4", honor: "荣誉4" },
+                { area: "区域E", team: "团队5", member: "成员5", role: "分析师", demandSolution: "需求解决方案5", specification: "规格书5", devUS: 50, task: "任务5", fault: "故障5", lowLevelCoding: "底层编码5", engineeringFault: "工程故障5", patchIssue: "补丁问题5", locatingTime: "5小时", skill: "技能5", certificate: "证书5", exam: "考试5", keyRoleCertification: "关键角色认证5", honor: "荣誉5" },
+                { area: "区域F", team: "团队6", member: "成员6", role: "架构师", demandSolution: "需求解决方案6", specification: "规格书6", devUS: 60, task: "任务6", fault: "故障6", lowLevelCoding: "底层编码6", engineeringFault: "工程故障6", patchIssue: "补丁问题6", locatingTime: "6小时", skill: "技能6", certificate: "证书6", exam: "考试6", keyRoleCertification: "关键角色认证6", honor: "荣誉6" },
+                { area: "区域G", team: "团队7", member: "成员7", role: "开发人员", demandSolution: "需求解决方案7", specification: "规格书7", devUS: 70, task: "任务7", fault: "故障7", lowLevelCoding: "底层编码7", engineeringFault: "工程故障7", patchIssue: "补丁问题7", locatingTime: "7小时", skill: "技能7", certificate: "证书7", exam: "考试7", keyRoleCertification: "关键角色认证7", honor: "荣誉7" },
+                { area: "区域H", team: "团队8", member: "成员8", role: "运维", demandSolution: "需求解决方案8", specification: "规格书8", devUS: 80, task: "任务8", fault: "故障8", lowLevelCoding: "底层编码8", engineeringFault: "工程故障8", patchIssue: "补丁问题8", locatingTime: "8小时", skill: "技能8", certificate: "证书8", exam: "考试8", keyRoleCertification: "关键角色认证8", honor: "荣誉8" },
+        ]}
+    </script>
+    <script components>
+    // select component
+    const arrowDown =
+        '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="#fffffe" d="m12 13.171l4.95-4.95l1.414 1.415L12 16L5.636 9.636L7.05 8.222z"/></svg>';
+        const checkIcon =
+        '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="#757575" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>';
+
+    class Selector {
+        constructor(container) {
+          container.insertAdjacentHTML(
+            "afterbegin",
+            `<div class="SELECTOR">
+              <div class="selector displayer">
+                <div class="displayer text"></div>
+                ${arrowDown}
+              </div>
+              <div class="selector content"><div class="content-container"></div></div>
+            </div>`
+          );
+
+          this.container = container;
+          this.displayerContainer = container.querySelector(".selector.displayer");
+          this.contentContainer = container.querySelector(".selector.content > div");
+        }
+
+        insertDefaultOption(text) {
+          if (typeof text !== "string") throw TypeError("insertDefaultOption: expect a string");
+
+          this.contentContainer.insertAdjacentHTML(
+            "afterbegin",
+            `<div class="selector-option selected-option" value=''>
+              ${checkIcon}
+              <span>${text.trim()}</span>
+            </div>`
+          );
+        }
+
+        insertOption(optionArray) {
+          if (!Array.isArray(optionArray)) throw TypeError("insertOption: expect an array contains string");
+
+          let options = "";
+          optionArray.forEach((text) => {
+            if (typeof text !== "string") throw TypeError("insertOption: expect an array contains string");
+
+            const _text = text.trim();
+            options += `<div class="selector-option" value=${_text}> <span>${_text}</span> </div>`;
+          });
+
+          this.contentContainer.insertAdjacentHTML("beforeend", options);
+        }
+
+        getSelectedText() {
+          return this.displayerContainer.querySelector(".text").textContent.trim();
+        };
+        
+        listeningSelector() {
+          `这里this的分析：;
+          1.首先按第一原则，谁调用 绑定谁的this
+          但是这里是addEventListener, 是DOM实例的方法，所以实际上this指向dom实例
+          2.另外，注意每一函数，运行起来就有一个函数级的上下文，function context。
+          这个context的this指向函数所归属的对象
+          3.箭头函数指向 “箭头函数this指向，所在函数运行时的this” (这句话真精髓)
+          这里所在函数就是listeningSelector`
+          this.container.addEventListener("click", (e) => {
+            this.handleClick(e);
+          });
+
+          document.addEventListener("click", (e) => {
+            if (!this.container.contains(e.target)) {
+              for (const item of this.container.querySelectorAll(".expand-selector-content")) {
+                item.classList.toggle("expand-selector-content");
+              }
+            }
+          });
+        }
+
+        toggleContent() {
+          this.contentContainer.parentElement.classList.toggle("expand-selector-content");
+        }
+
+        showSelected() {
+          const selectedOption = this.contentContainer.querySelector(".selected-option").textContent;
+          this.displayerContainer.querySelector(".displayer.text").textContent = selectedOption;
+        }
+
+        clearDisplayer() {
+          this.displayerContainer.querySelector(".displayer.text").textContent = "";
+        }
+
+        handleClick(e) {
+          if (this.displayerContainer.contains(e.target)) {
+            this.toggleContent();
+          } else if (this.contentContainer.contains(e.target)) {
+            const option = e.target.closest(".selector-option");
+
+            if (option.classList.contains("selected-option")) {
+              // option.querySelector("svg").remove();
+              // option.classList.remove("selected-option");
+              // this.clearDisplayer();
+            } else {
+              const currentSelected = this.contentContainer.querySelector(".selected-option");
+              currentSelected?.querySelector("svg").remove();
+              currentSelected?.classList.remove("selected-option");
+
+              option.insertAdjacentHTML("afterBegin", checkIcon);
+              option.classList.add("selected-option");
+              this.showSelected();
+            }
+
+            this.toggleContent();
+          } else {
+            return;
+          }
+        }
+
+        createSelector(defaultText = null, optionArray = null) {
+          if (defaultText) this.insertDefaultOption(defaultText);
+          if (optionArray) this.insertOption(optionArray);
+          this.listeningSelector();
+          this.showSelected();
+        }
+      }
+
+      // table component
+      function createColumn(table) {
+        const colGroup = document.createElement("colgroup");
+
+        for (let i = 0; i < fixedCols; i++) {
+          colGroup.insertAdjacentHTML("beforeend", `<col class="fixed-col col-${i}">`);
+        }
+
+        table.appendChild(colGroup);
+      }
+
+      function createTableHead(table) {
+        const thead = table.createTHead();
+        const headRow = thead.insertRow();
+
+        colNames.forEach((item, index) => {
+          if (index < fixedCols) {
+            headRow.insertAdjacentHTML("beforeend", `<td class="fixed-col fixed-col-${index}">${item}</td>`);
+          } else {
+            const td = headRow.insertCell();
+            td.textContent = item;
+            headRow.appendChild(td);
+          }
+        });
+
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+      }
+
+      function createTableBody(table, data) {
+        const tbody = table.createTBody();
+
+        data.forEach((item_array) => {
+          const row = tbody.insertRow();
+
+          Object.values(item_array).forEach((item, index) => {
+            const cell = row.insertCell();
+
+            if (index < fixedCols) cell.classList.add("fixed-col", `fixed-col-${index}`);
+            cell.textContent = item;
+          });
+        });
+      }
+
+      // set date
+
+      function setDefaultMonthValues() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth(); // 注意：getMonth() 返回的是 0-11 的整数
+        const lastmonth = month === 0 ? 11 : month - 1; // 如果是1月，则上个月为去年12月
+
+        document.getElementById("enddate").value = `${year}-${String(lastmonth + 1).padStart(2, "0")}`;
+        document.getElementById("startdate").value = `${year}-${String(lastmonth + 1).padStart(2, "0")}`;
+      }
+    </script>
+
+    <script render>
+      // 设置月份
+      setDefaultMonthValues();
+
+      // 初始化领域团队的下拉组件
+      const areaSelector = new Selector(areaSelectorContainer);
+      const teamSelector = new Selector(teamSelectorContainer);
+
+      areaSelector.createSelector((defaultText = "全部"));
+      teamSelector.createSelector((defaultText = "全部"));
+
+      areaSelector.insertOption(Object.keys(areaAndTeam));
+
+      // 监听领域按钮，相应更新团队
+      areaSelectorContainer.addEventListener("click", (e) => {
+        if (!areaSelector.contentContainer.contains(e.target)) return;
+
+        const area = areaSelector.getSelectedText();
+        const contentContainer = teamSelector.contentContainer;
+
+        // 注意：因为上面设置了默认option，所以children保留一个
+        while (contentContainer.children.length > 1) {
+          contentContainer.removeChild(contentContainer.lastChild);
+        }
+
+        if (area === "全部") return;
+        teamSelector.insertOption(areaAndTeam[area]);
+      });
+
+      // 处理维度选择
+      typeSelectContainer.addEventListener("click", (e) => {
+        if (!typeSelectContainer.contains(e.target)) return;
+
+        typeSelectContainer.querySelector(".selected-type").classList.remove("selected-type");
+        const selectedType = e.target.closest(".type-button");
+        selectedType.classList.add("selected-type");
+
+        if (selectedType.textContent === "领域") {
+          if (teamSelector.getSelectedText() !== "全部") {
+            teamSelectorContainer.querySelector(".selector-option").click();
+          }
+          disableSelector(teamSelectorContainer.querySelector(".SELECTOR"));
+        } else {
+          teamSelectorContainer.querySelector(".selector-mask")?.remove();
+        }
+      });
+
+      function disableSelector(selector) {
+        const mask = document.createElement("div");
+        mask.classList.add("selector-mask");
+        selector.appendChild(mask);
+      }
+
+      // 表格
+      const table = document.createElement("table");
+      createColumn(table);
+      createTableHead(table);
+      createTableBody(table, tableData["table"]);
+      tableContainer.appendChild(table);
+    </script>
+</body>
+</html>
